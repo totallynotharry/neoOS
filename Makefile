@@ -1,17 +1,18 @@
 TARGET ?= x86_64
+VERSION ?= dev
 BUILD_DIR := build/$(TARGET)
 KERNEL_ELF := $(BUILD_DIR)/kernel.elf
 
 ifeq ($(TARGET),x86_64)
 CC := clang
 LD := ld.lld
-CFLAGS := -ffreestanding -fno-stack-protector -m64 -mno-red-zone -Ikernel/include -O2 -Wall -Wextra
+CFLAGS := -ffreestanding -fno-stack-protector -m64 -mno-red-zone -Ikernel/include -O2 -Wall -Wextra -DNEOOS_VERSION_STR=\"$(VERSION)\"
 LDFLAGS := -T kernel/linker-x86_64.ld
 QEMU := qemu-system-x86_64 -cdrom $(BUILD_DIR)/neoOS-x86_64.iso -m 512M
 else ifeq ($(TARGET),aarch64)
 CC := aarch64-linux-gnu-gcc
 LD := aarch64-linux-gnu-ld
-CFLAGS := -ffreestanding -fno-stack-protector -Ikernel/include -O2 -Wall -Wextra
+CFLAGS := -ffreestanding -fno-stack-protector -Ikernel/include -O2 -Wall -Wextra -DNEOOS_VERSION_STR=\"$(VERSION)\"
 LDFLAGS := -T kernel/linker-aarch64.ld
 QEMU := qemu-system-aarch64 -M virt -cpu cortex-a72 -m 1024 -kernel $(KERNEL_ELF) -nographic
 else
@@ -45,7 +46,7 @@ run: iso
 
 help:
 	@echo "Targets:"
-	@echo "  make TARGET=x86_64        - build x86_64 kernel"
+	@echo "  make TARGET=x86_64 VERSION=dev - build x86_64 kernel"
 	@echo "  make TARGET=aarch64       - build aarch64 kernel"
 	@echo "  make prepare-limine       - fetch/copy Limine CD boot files"
 	@echo "  make iso TARGET=x86_64    - build bootable x86_64 ISO"

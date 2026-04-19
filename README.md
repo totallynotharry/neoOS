@@ -37,7 +37,7 @@ sudo apt-get install -y \
 ### 2) Build x86_64 kernel
 
 ```bash
-make TARGET=x86_64
+make TARGET=x86_64 VERSION=dev
 ```
 
 ### 3) Build bootable x86_64 ISO
@@ -89,6 +89,7 @@ A GitHub Actions workflow is included at `.github/workflows/release-iso.yml`.
 
 - Trigger: push a tag like `v0.1.0` (or manual run).
 - Output: `neoOS-x86_64.iso` and `.sha256` checksum uploaded as release assets after ISO validation (`scripts/inspect_iso.sh`).
+- Build tag is compiled into the desktop top bar (`neoOS v<tag>`) so you can visually confirm the running release image.
 
 Example:
 

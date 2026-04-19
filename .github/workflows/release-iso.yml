@@ -25,7 +25,7 @@ jobs:
       - name: Build kernel
         run: |
           make clean
-          make TARGET=x86_64
+          make TARGET=x86_64 VERSION="${GITHUB_REF_NAME:-dev}"
 
       - name: Prepare Limine files
         run: make prepare-limine

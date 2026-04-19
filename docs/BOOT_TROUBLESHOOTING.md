@@ -136,3 +136,11 @@ Try in VirtualBox:
 - Boot in BIOS mode with the ISO attached as optical media
 
 Then rebuild and boot again.
+
+
+## Suspected wrong release ISO
+
+neoOS now compiles the release tag into the top bar text (`neoOS v<tag>`).
+If the on-screen tag does not match the GitHub release you downloaded, the wrong ISO was booted.
+
+Also verify the downloaded file against the published `.sha256` checksum asset.

@@ -1,6 +1,10 @@
 #include <neo/kernel.h>
 #include <stdint.h>
 
+#ifndef NEOOS_VERSION_STR
+#define NEOOS_VERSION_STR "dev"
+#endif
+
 #define MULTIBOOT2_HEADER_MAGIC 0xe85250d6u
 #define MULTIBOOT2_BOOTLOADER_MAGIC 0x36d76289u
 #define MULTIBOOT2_TAG_TYPE_END 0u
@@ -56,6 +60,13 @@ static struct mb2_framebuffer_tag *find_framebuffer_tag(uintptr_t mb_info_addr) 
     return 0;
 }
 
+static uint16_t rgb_to_565(uint32_t rgb) {
+    uint8_t r = (uint8_t)((rgb >> 16) & 0xFFu);
+    uint8_t g = (uint8_t)((rgb >> 8) & 0xFFu);
+    uint8_t b = (uint8_t)(rgb & 0xFFu);
+    return (uint16_t)(((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3));
+}
+
 static void put_pixel(struct mb2_framebuffer_tag *fb, uint32_t x, uint32_t y, uint32_t rgb) {
     if (x >= fb->width || y >= fb->height) {
         return;
@@ -69,6 +80,8 @@ static void put_pixel(struct mb2_framebuffer_tag *fb, uint32_t x, uint32_t y, ui
         base[0] = (uint8_t)(rgb & 0xFFu);
         base[1] = (uint8_t)((rgb >> 8) & 0xFFu);
         base[2] = (uint8_t)((rgb >> 16) & 0xFFu);
+    } else if (fb->bpp == 16) {
+        *(uint16_t *)base = rgb_to_565(rgb);
     }
 }
 
@@ -103,6 +116,64 @@ static void fill_circle(struct mb2_framebuffer_tag *fb, int cx, int cy, int r, u
     }
 }
 
+static const uint8_t *glyph_for(char c) {
+    static const uint8_t g_dot[7] = {0, 0, 0, 0, 0, 0x04, 0};
+    static const uint8_t g_v[7] = {0, 0, 0x11, 0x11, 0x11, 0x0A, 0x04};
+    static const uint8_t g_e[7] = {0, 0x0E, 0x11, 0x1F, 0x10, 0x0F, 0};
+    static const uint8_t g_n[7] = {0, 0, 0x16, 0x19, 0x11, 0x11, 0};
+    static const uint8_t g_o[7] = {0, 0, 0x0E, 0x11, 0x11, 0x0E, 0};
+    static const uint8_t g_s[7] = {0, 0x0F, 0x10, 0x0E, 0x01, 0x1E, 0};
+    static const uint8_t g_vu[7] = {0x11, 0x11, 0x11, 0x11, 0x0A, 0x04, 0};
+    static const uint8_t g_space[7] = {0, 0, 0, 0, 0, 0, 0};
+    static const uint8_t g_0[7] = {0x0E, 0x11, 0x13, 0x15, 0x19, 0x11, 0x0E};
+    static const uint8_t g_1[7] = {0x04, 0x0C, 0x04, 0x04, 0x04, 0x04, 0x0E};
+    static const uint8_t g_2[7] = {0x0E, 0x11, 0x01, 0x02, 0x04, 0x08, 0x1F};
+    static const uint8_t g_3[7] = {0x1E, 0x01, 0x01, 0x0E, 0x01, 0x01, 0x1E};
+    static const uint8_t g_4[7] = {0x02, 0x06, 0x0A, 0x12, 0x1F, 0x02, 0x02};
+    static const uint8_t g_5[7] = {0x1F, 0x10, 0x1E, 0x01, 0x01, 0x11, 0x0E};
+    static const uint8_t g_6[7] = {0x06, 0x08, 0x10, 0x1E, 0x11, 0x11, 0x0E};
+    static const uint8_t g_7[7] = {0x1F, 0x01, 0x02, 0x04, 0x08, 0x08, 0x08};
+    static const uint8_t g_8[7] = {0x0E, 0x11, 0x11, 0x0E, 0x11, 0x11, 0x0E};
+    static const uint8_t g_9[7] = {0x0E, 0x11, 0x11, 0x0F, 0x01, 0x02, 0x0C};
+
+    switch (c) {
+        case '.': return g_dot;
+        case 'v': return g_v;
+        case 'e': return g_e;
+        case 'n': return g_n;
+        case 'o': return g_o;
+        case 's': return g_s;
+        case 'V': return g_vu;
+        case ' ': return g_space;
+        case '0': return g_0;
+        case '1': return g_1;
+        case '2': return g_2;
+        case '3': return g_3;
+        case '4': return g_4;
+        case '5': return g_5;
+        case '6': return g_6;
+        case '7': return g_7;
+        case '8': return g_8;
+        case '9': return g_9;
+        default: return g_space;
+    }
+}
+
+static void draw_text(struct mb2_framebuffer_tag *fb, uint32_t x, uint32_t y, const char *s, uint32_t color) {
+    while (*s) {
+        const uint8_t *g = glyph_for(*s);
+        for (uint32_t row = 0; row < 7; row++) {
+            for (uint32_t col = 0; col < 5; col++) {
+                if (g[row] & (1u << (4u - col))) {
+                    put_pixel(fb, x + col, y + row, color);
+                }
+            }
+        }
+        x += 6;
+        s++;
+    }
+}
+
 static void draw_gradient_bg(struct mb2_framebuffer_tag *fb) {
     for (uint32_t y = 0; y < fb->height; y++) {
         uint32_t r = 18u + (20u * y) / (fb->height ? fb->height : 1u);
@@ -127,7 +198,7 @@ static void draw_window(struct mb2_framebuffer_tag *fb, uint32_t x, uint32_t y, 
 static void draw_top_bar(struct mb2_framebuffer_tag *fb) {
     fill_rect(fb, 0, 0, fb->width, 28, 0x1a1d28);
     fill_rect(fb, 10, 8, 8, 8, 0xffffff);
-    fill_rect(fb, fb->width > 80 ? fb->width - 80 : 0, 7, 65, 14, 0x2d3342);
+    draw_text(fb, 28, 10, "neoOS v" NEOOS_VERSION_STR, 0xd9e0ee);
 }
 
 static void draw_dock(struct mb2_framebuffer_tag *fb) {
@@ -181,7 +252,7 @@ static void vga_write(const char *s, uint8_t color, int row) {
 void neo_kernel_main(unsigned long magic, unsigned long mb_info_addr) {
     if ((uint32_t)magic == MULTIBOOT2_BOOTLOADER_MAGIC) {
         struct mb2_framebuffer_tag *fb = find_framebuffer_tag((uintptr_t)mb_info_addr);
-        if (fb != 0 && (fb->bpp == 32 || fb->bpp == 24)) {
+        if (fb != 0 && (fb->bpp == 32 || fb->bpp == 24 || fb->bpp == 16)) {
             draw_desktop(fb);
             for (;;) {
                 __asm__ volatile("hlt");
