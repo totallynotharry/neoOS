@@ -147,6 +147,7 @@ neoOS/
 See:
 - `docs/ARCHITECTURE.md`
 - `docs/ROADMAP.md`
+- `docs/BOOT_TROUBLESHOOTING.md`
 
 ## Publishing to GitHub main
 
