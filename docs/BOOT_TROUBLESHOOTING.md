@@ -100,3 +100,14 @@ make TARGET=x86_64
 make prepare-limine
 make iso TARGET=x86_64
 ```
+
+
+## Error: black screen after selecting neoOS
+
+If boot succeeds but the screen stays black, force text mode in Limine config:
+
+```text
+graphics: no
+```
+
+This repo now sets `graphics: no` by default and writes a kernel banner to VGA text memory (`0xB8000`) as an early bring-up sanity check.
