@@ -2,7 +2,7 @@
 
 neoOS is an independent, Unix-like operating system project written primarily in C.
 
-> **Status:** early-stage scaffold and architecture baseline.
+> **Status:** early-stage scaffold and architecture baseline (now with a visible desktop mock scene at boot).
 
 This repository now contains a buildable kernel skeleton and a concrete roadmap for the full product vision:
 - macOS-like desktop shell (menu bar, animated magnifying dock, traffic-light window controls)
@@ -17,6 +17,7 @@ The OS is **not based on Linux**.
 ## Current capabilities
 
 - Cross-target kernel scaffold in C
+- Static desktop scene renderer (menu bar, dock, traffic-light windows)
 - Basic graphics/window-server architecture documented
 - Build system split by architecture (`x86_64`, `aarch64`)
 - Bootable ISO workflow for x86_64 using Limine + UEFI/BIOS
