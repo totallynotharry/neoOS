@@ -87,19 +87,13 @@ Avoid old-style forms like uppercase `PROTOCOL=` or entry labels like `:neoOS` w
 
 ## Error: `elf: Lower half PHDRs are not allowed`
 
-Limine's native protocol expects a higher-half x86_64 kernel image.
-If you see this panic, your kernel ELF was linked at a low virtual address.
+This panic appears when using Limine native protocol with a low-half kernel ELF.
+neoOS now avoids this in early bring-up by booting via:
 
-This repo now links x86_64 at `0xffffffff80000000` and uses `-mcmodel=kernel` to produce a higher-half kernel binary.
+- `protocol: multiboot2`
+- `graphics: no`
 
-Rebuild:
-
-```bash
-make clean
-make TARGET=x86_64
-make prepare-limine
-make iso TARGET=x86_64
-```
+If you still hit this message, verify your ISO contains the latest `boot/limine.cfg` and rebuild from clean artifacts.
 
 
 ## Error: black screen after selecting neoOS
@@ -111,3 +105,14 @@ graphics: no
 ```
 
 This repo now sets `graphics: no` by default and writes a kernel banner to VGA text memory (`0xB8000`) as an early bring-up sanity check.
+
+
+## Black screen fallback mode used by this repo
+
+To maximize compatibility with VirtualBox BIOS boots during early bring-up, neoOS currently uses:
+
+- `protocol: multiboot2`
+- `graphics: no`
+- VGA text output at `0xB8000`
+
+This avoids Limine native-protocol higher-half loader constraints while kernel bring-up is still minimal.

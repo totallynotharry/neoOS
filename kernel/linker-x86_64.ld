@@ -2,7 +2,11 @@ ENTRY(neo_kernel_main)
 
 SECTIONS
 {
-  . = 0xffffffff80000000;
+  . = 1M;
+
+  .multiboot : ALIGN(8) {
+    KEEP(*(.multiboot))
+  }
 
   .text : ALIGN(4K) {
     *(.text*)
