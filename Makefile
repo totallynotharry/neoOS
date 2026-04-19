@@ -21,7 +21,7 @@ endif
 SRC := $(wildcard kernel/src/*.c)
 OBJ := $(patsubst kernel/src/%.c,$(BUILD_DIR)/%.o,$(SRC))
 
-.PHONY: all clean iso run help
+.PHONY: all clean iso run help prepare-limine
 
 all: $(KERNEL_ELF)
 
@@ -34,8 +34,10 @@ $(BUILD_DIR)/%.o: kernel/src/%.c | $(BUILD_DIR)
 $(KERNEL_ELF): $(OBJ)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-iso: all
-	@echo "Building x86_64 ISO requires Limine BIOS/UEFI CD files in build/x86_64/isodir/boot"
+prepare-limine:
+	./scripts/prepare_limine.sh
+
+iso: all prepare-limine
 	./scripts/build_iso.sh
 
 run: iso
@@ -45,6 +47,7 @@ help:
 	@echo "Targets:"
 	@echo "  make TARGET=x86_64        - build x86_64 kernel"
 	@echo "  make TARGET=aarch64       - build aarch64 kernel"
+	@echo "  make prepare-limine       - fetch/copy Limine CD boot files"
 	@echo "  make iso TARGET=x86_64    - build bootable x86_64 ISO"
 	@echo "  make run TARGET=x86_64    - run x86_64 ISO in QEMU"
 

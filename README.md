@@ -19,9 +19,10 @@ The OS is **not based on Linux**.
 - Cross-target kernel scaffold in C
 - Basic graphics/window-server architecture documented
 - Build system split by architecture (`x86_64`, `aarch64`)
-- Bootable ISO workflow documented for x86_64 using Limine + UEFI/BIOS
+- Bootable ISO workflow for x86_64 using Limine + UEFI/BIOS
+- GitHub Actions workflow to publish x86_64 ISO artifacts on releases/tags
 
-## Quick start
+## Linux/macOS quick start
 
 ### 1) Install toolchains (Ubuntu/Debian example)
 
@@ -29,7 +30,7 @@ The OS is **not based on Linux**.
 sudo apt-get update
 sudo apt-get install -y \
   make clang lld nasm xorriso mtools qemu-system-x86 qemu-system-aarch64 \
-  gcc-aarch64-linux-gnu
+  gcc-aarch64-linux-gnu git
 ```
 
 ### 2) Build x86_64 kernel
@@ -50,20 +51,49 @@ make iso TARGET=x86_64
 make run TARGET=x86_64
 ```
 
+## Windows build method
+
+### Recommended: WSL2 (Ubuntu)
+
+1. Install WSL2 and Ubuntu.
+2. Clone this repo inside WSL.
+3. Follow the Linux quick start commands above.
+
+This is the easiest reliable path because the OS toolchain and ISO tooling are Linux-native.
+
+### Optional native path: MSYS2/Clang (advanced)
+
+A native Windows flow is possible but more fragile because Limine and ISO tooling assumptions are POSIX-centric. If you need fully native Windows builds, keep the same Makefile targets and install compatible equivalents of: `clang`, `lld`, `make`, `xorriso`, `git`, and QEMU in your MSYS2 environment.
+
 ## Build instructions for bootable ISO
 
 The bootable ISO flow is implemented for `x86_64`:
 
 1. Build kernel ELF (`build/x86_64/kernel.elf`).
-2. Stage ISO files under `build/x86_64/isodir`.
-3. Copy `boot/limine.cfg` and kernel into ISO tree.
+2. `make prepare-limine` fetches/copies Limine CD boot files into `build/x86_64/isodir/boot`.
+3. Stage `boot/limine.cfg` and kernel into the ISO tree.
 4. Use `xorriso` to generate `build/x86_64/neoOS-x86_64.iso`.
-5. (Optional) Install Limine boot sectors if your local Limine tooling is present.
 
-Command:
+Commands:
 
 ```bash
+make TARGET=x86_64
+make prepare-limine
 make iso TARGET=x86_64
+```
+
+## Release ISO automation (GitHub Releases)
+
+A GitHub Actions workflow is included at `.github/workflows/release-iso.yml`.
+
+- Trigger: push a tag like `v0.1.0` (or manual run).
+- Output: `neoOS-x86_64.iso` uploaded as a release asset.
+
+Example:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
 ```
 
 ## ARM / Raspberry Pi status
@@ -74,12 +104,13 @@ The build system supports `TARGET=aarch64` for kernel compilation and linker lay
 
 ```text
 neoOS/
-  boot/                  # bootloader configs
-  docs/                  # architecture + roadmap
+  .github/workflows/       # CI/CD including release ISO workflow
+  boot/                    # bootloader configs
+  docs/                    # architecture + roadmap
   kernel/
-    include/             # kernel headers
-    src/                 # kernel C sources
-  scripts/               # build helper scripts
+    include/               # kernel headers
+    src/                   # kernel C sources
+  scripts/                 # build helper scripts
   Makefile
 ```
 
