@@ -30,7 +30,6 @@ required=(
   "/boot/limine-uefi-cd.bin"
   "/limine-bios.sys"
   "/boot/kernel.elf"
-  "/boot/limine.cfg"
 )
 
 missing=0
@@ -40,6 +39,26 @@ for path in "${required[@]}"; do
     missing=1
   fi
 done
+
+config_paths=(
+  "/limine.conf"
+  "/limine.cfg"
+  "/boot/limine.conf"
+  "/boot/limine.cfg"
+)
+
+found_config=0
+for cfg in "${config_paths[@]}"; do
+  if grep -Fxq "$cfg" <<<"$TREE"; then
+    found_config=1
+    break
+  fi
+done
+
+if [[ $found_config -eq 0 ]]; then
+  echo "MISSING: Limine config file (looked for /limine.conf, /limine.cfg, /boot/limine.conf, /boot/limine.cfg)"
+  missing=1
+fi
 
 if [[ $missing -ne 0 ]]; then
   echo "ISO check FAILED"

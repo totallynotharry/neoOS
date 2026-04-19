@@ -51,3 +51,19 @@ Expected required entries:
 
 Release workflow can publish a broken ISO if Limine assets are unavailable at build time.
 Always inspect generated ISO contents when changing release tooling.
+
+
+## Error: `Config File not Found`
+
+If Limine boots but shows `Config File not Found`, ensure config exists in at least one default location.
+The ISO build now places config at:
+- `/limine.conf`
+- `/limine.cfg`
+- `/boot/limine.conf`
+- `/boot/limine.cfg`
+
+Rebuild the ISO and verify with:
+
+```bash
+./scripts/inspect_iso.sh build/x86_64/neoOS-x86_64.iso
+```
