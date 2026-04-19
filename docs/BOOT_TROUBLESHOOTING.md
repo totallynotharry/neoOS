@@ -83,3 +83,20 @@ timeout: 0
 ```
 
 Avoid old-style forms like uppercase `PROTOCOL=` or entry labels like `:neoOS` with newer Limine versions.
+
+
+## Error: `elf: Lower half PHDRs are not allowed`
+
+Limine's native protocol expects a higher-half x86_64 kernel image.
+If you see this panic, your kernel ELF was linked at a low virtual address.
+
+This repo now links x86_64 at `0xffffffff80000000` and uses `-mcmodel=kernel` to produce a higher-half kernel binary.
+
+Rebuild:
+
+```bash
+make clean
+make TARGET=x86_64
+make prepare-limine
+make iso TARGET=x86_64
+```

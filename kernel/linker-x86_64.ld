@@ -2,7 +2,7 @@ ENTRY(neo_kernel_main)
 
 SECTIONS
 {
-  . = 1M;
+  . = 0xffffffff80000000;
 
   .text : ALIGN(4K) {
     *(.text*)

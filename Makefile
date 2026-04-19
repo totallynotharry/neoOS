@@ -5,7 +5,7 @@ KERNEL_ELF := $(BUILD_DIR)/kernel.elf
 ifeq ($(TARGET),x86_64)
 CC := clang
 LD := ld.lld
-CFLAGS := -ffreestanding -fno-stack-protector -m64 -Ikernel/include -O2 -Wall -Wextra
+CFLAGS := -ffreestanding -fno-stack-protector -m64 -mcmodel=kernel -mno-red-zone -Ikernel/include -O2 -Wall -Wextra
 LDFLAGS := -T kernel/linker-x86_64.ld
 QEMU := qemu-system-x86_64 -cdrom $(BUILD_DIR)/neoOS-x86_64.iso -m 512M
 else ifeq ($(TARGET),aarch64)
