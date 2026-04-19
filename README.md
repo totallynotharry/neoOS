@@ -88,7 +88,7 @@ make iso TARGET=x86_64
 A GitHub Actions workflow is included at `.github/workflows/release-iso.yml`.
 
 - Trigger: push a tag like `v0.1.0` (or manual run).
-- Output: `neoOS-x86_64.iso` uploaded as a release asset.
+- Output: `neoOS-x86_64.iso` and `.sha256` checksum uploaded as release assets after ISO validation (`scripts/inspect_iso.sh`).
 
 Example:
 
