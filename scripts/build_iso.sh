@@ -10,6 +10,11 @@ mkdir -p "$ISO_DIR/boot"
 cp "$BUILD_DIR/kernel.elf" "$ISO_DIR/boot/kernel.elf"
 cp "$ROOT_DIR/boot/limine.cfg" "$ISO_DIR/boot/limine.cfg"
 
+if [[ ! -f "$ISO_DIR/limine-bios.sys" ]]; then
+  echo "ERROR: $ISO_DIR/limine-bios.sys is missing. Run: make prepare-limine"
+  exit 1
+fi
+
 xorriso -as mkisofs \
   -b boot/limine-bios-cd.bin \
   -no-emul-boot \

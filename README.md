@@ -96,6 +96,34 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
+
+## VirtualBox notes (important)
+
+If you see:
+
+- `PANIC: Failed to load stage 3`
+- `have you copied limine-bios.sys ...`
+
+then the ISO was built without `limine-bios.sys` in expected locations. This repo now copies it into `/`, `/boot`, and `/limine` inside the ISO during `make prepare-limine`.
+
+Recommended VM settings for x86_64 testing:
+
+- **Type**: Other/Unknown (64-bit)
+- **Memory**: 512 MB or more
+- **Chipset**: PIIX3 (works reliably for legacy BIOS path)
+- **EFI**: Disabled for BIOS boot testing, Enabled only if you want UEFI path
+- **Storage**: Attach ISO as optical drive (not hard disk)
+- **Acceleration**: VT-x/AMD-V enabled
+
+Rebuild steps after pulling latest changes:
+
+```bash
+make clean
+make TARGET=x86_64
+make prepare-limine
+make iso TARGET=x86_64
+```
+
 ## ARM / Raspberry Pi status
 
 The build system supports `TARGET=aarch64` for kernel compilation and linker layout. For Raspberry Pi bring-up, the next milestone is a dedicated ARM boot image path (`.img`) with board-specific firmware handoff.
