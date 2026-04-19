@@ -67,3 +67,19 @@ Rebuild the ISO and verify with:
 ```bash
 ./scripts/inspect_iso.sh build/x86_64/neoOS-x86_64.iso
 ```
+
+
+## Error: `config file contains no valid entries`
+
+This means Limine found the config file but rejected its syntax.
+Use modern Limine syntax with a slash-prefixed entry and `key: value` options, for example:
+
+```text
+timeout: 0
+
+/neoOS
+    protocol: limine
+    kernel_path: boot():/boot/kernel.elf
+```
+
+Avoid old-style forms like uppercase `PROTOCOL=` or entry labels like `:neoOS` with newer Limine versions.
