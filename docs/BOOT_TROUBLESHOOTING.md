@@ -91,28 +91,34 @@ This panic appears when using Limine native protocol with a low-half kernel ELF.
 neoOS now avoids this in early bring-up by booting via:
 
 - `protocol: multiboot2`
-- `graphics: no`
+- `graphics: yes`
 
 If you still hit this message, verify your ISO contains the latest `boot/limine.cfg` and rebuild from clean artifacts.
 
 
 ## Error: black screen after selecting neoOS
 
-If boot succeeds but the screen stays black, force text mode in Limine config:
+If boot succeeds but the screen stays black, prefer framebuffer mode in Limine config:
 
 ```text
-graphics: no
+graphics: yes
 ```
 
-This repo now sets `graphics: no` by default and writes a kernel banner to VGA text memory (`0xB8000`) as an early bring-up sanity check.
+This repo now sets `graphics: yes` by default and draws directly to the framebuffer when available, with VGA text only as fallback.
 
 
-## Black screen fallback mode used by this repo
+## Display mode used by this repo
 
 To maximize compatibility with VirtualBox BIOS boots during early bring-up, neoOS currently uses:
 
 - `protocol: multiboot2`
-- `graphics: no`
-- VGA text output at `0xB8000`
+- `graphics: yes`
+- Multiboot2 framebuffer rendering (with VGA fallback)
 
-This avoids Limine native-protocol higher-half loader constraints while kernel bring-up is still minimal.
+This keeps display output reliable on VMs where direct VGA text mode is inconsistent.
+
+
+## Error: colored glyphs/garbled symbols instead of readable text
+
+That usually means VGA text memory writes are being attempted while the display is in graphics mode.
+neoOS now prefers the Multiboot2 framebuffer tag and renders solid color blocks directly to the framebuffer when available, with VGA text only as fallback.
