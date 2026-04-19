@@ -10,8 +10,16 @@ __attribute__((used, section(".multiboot"), aligned(8)))
 static const uint32_t multiboot2_header[] = {
     MULTIBOOT2_HEADER_MAGIC,
     0,
-    24,
-    (uint32_t)(0u - (MULTIBOOT2_HEADER_MAGIC + 0u + 24u)),
+    40,
+    (uint32_t)(0u - (MULTIBOOT2_HEADER_MAGIC + 0u + 40u)),
+
+    /* Framebuffer request tag (type=5, flags=0, size=20). */
+    5u | (0u << 16),
+    20u,
+    1024u,
+    768u,
+    32u,
+
     0,
     8
 };
@@ -182,7 +190,7 @@ void neo_kernel_main(unsigned long magic, unsigned long mb_info_addr) {
     }
 
     vga_write("neoOS: framebuffer unavailable", 0x0F, 0);
-    vga_write("Fallback text mode path", 0x0C, 1);
+    vga_write("No MB2 framebuffer tag. Check VM graphics settings.", 0x0C, 1);
 
     for (;;) {
         __asm__ volatile("hlt");

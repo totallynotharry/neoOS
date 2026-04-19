@@ -122,3 +122,17 @@ This keeps display output reliable on VMs where direct VGA text mode is inconsis
 
 That usually means VGA text memory writes are being attempted while the display is in graphics mode.
 neoOS now prefers the Multiboot2 framebuffer tag and renders solid color blocks directly to the framebuffer when available, with VGA text only as fallback.
+
+
+## Message: `Fallback text mode path` / `framebuffer unavailable`
+
+This means the kernel did not receive a Multiboot2 framebuffer tag from the bootloader.
+neoOS now embeds a framebuffer request (1024x768x32), but VM graphics settings can still block it.
+
+Try in VirtualBox:
+- Display Controller: **VMSVGA**
+- Video Memory: **128 MB**
+- Enable 3D Acceleration: **off** (for early bring-up)
+- Boot in BIOS mode with the ISO attached as optical media
+
+Then rebuild and boot again.
